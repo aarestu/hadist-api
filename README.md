@@ -2,6 +2,8 @@
 
 Aplikasi Importer Data Hadis dari **[fawazahmed0/hadith-api](https://github.com/fawazahmed0/hadith-api)** ke Database Relasional (PostgreSQL, SQLite, MySQL) berbasis **Python Async & SQLAlchemy 2.0 ORM**.
 
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/aarestu/hadist-api/blob/master/docs/Colab_Hadist_API_Vector_Search.ipynb)
+
 ---
 
 ## 🛠️ Isolated Workspace Setup (Venv & Conda)
@@ -134,6 +136,18 @@ python -m app.cli.benchmark_batch -s 500
 
 ---
 
+## ☁️ Jalankan di Google Colab (Free T4 GPU)
+
+Anda dapat menguji dan menjalankan proses pembuatan vektor embedding & pencarian semantik secara gratis menggunakan GPU T4 di Google Colab:
+
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/aarestu/hadist-api/blob/master/docs/Colab_Hadist_API_Vector_Search.ipynb)
+
+1. Buka notebook [`docs/Colab_Hadist_API_Vector_Search.ipynb`](docs/Colab_Hadist_API_Vector_Search.ipynb) atau klik tombol **Open In Colab** di atas.
+2. Pastikan GPU aktif: **Runtime** -> **Change runtime type** -> **T4 GPU**.
+3. Jalankan sel berurutan untuk clone repo, impor data, generate vector, dan cari hadis semantik.
+
+---
+
 ## ⚙️ Konfigurasi (`config.yaml` & `.env`)
 
 Anda dapat menyesuaikan database target dan filter bahasa pada `config.yaml`:
@@ -177,6 +191,7 @@ hadist-api/
 ├── docs/
 │   ├── adr/
 │   │   └── 0001-vector-search-architecture.md # Architectural Decision Record Vector Search
+│   ├── Colab_Hadist_API_Vector_Search.ipynb  # Interactive Google Colab Notebook
 │   └── hadist-schema.md     # Rancangan Skema Relasional & PostgreSQL DDL (Trigram Index)
 ├── setup.bat                # Automated Venv Setup Script (Windows)
 ├── setup.sh                 # Automated Venv Setup Script (Linux/macOS)
