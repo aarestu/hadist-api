@@ -21,7 +21,7 @@ logging.basicConfig(
 logger = logging.getLogger("HadithSearchCLI")
 
 
-def display_hadith_result(result: dict):
+def display_hadith_result(result: dict, parse_lang: str = "Indonesian"):
     """Menampilkan hasil pencarian hadis dengan format konsol yang rapi."""
     print("\n" + "=" * 70)
     print(f"📖 KITAB       : {result['book_name']} ({result['book_slug']})")
@@ -39,25 +39,33 @@ def display_hadith_result(result: dict):
 
     print("-" * 70)
     print("💬 TEKS & TERJEMAHAN:")
-    ind_or_eng_text = ""
+    
+    target_text_for_parser = ""
+    target_lang_found = ""
+
     if not result["texts"]:
         print("  (Tidak ada teks terjemahan yang sesuai filter)")
     else:
         for idx, t in enumerate(result["texts"], start=1):
             print(f"\n  [{idx}] Edisi: {t['edition_name']} ({t['language']}) - Penulis: {t['author']}")
             print(f"      \"{t['text']}\"")
-            if "ind" in t['language'].lower():
-                ind_or_eng_text = t['text']
-            elif not ind_or_eng_text and "eng" in t['language'].lower():
-                ind_or_eng_text = t['text']
+            
+            # Cari teks yang cocok dengan parse_lang
+            if parse_lang.lower() in t['language'].lower():
+                target_text_for_parser = t['text']
+                target_lang_found = t['language']
+            elif not target_text_for_parser and ("ind" in t['language'].lower() or "eng" in t['language'].lower()):
+                target_text_for_parser = t['text']
+                target_lang_found = t['language']
 
-    if ind_or_eng_text:
+    # Integrasi Local LLM Parser (jika LLM lokal tersedia)
+    if target_text_for_parser:
         from app.services.llm_parser_service import LocalLLMHadithParserService
         parser_service = LocalLLMHadithParserService()
-        parsed_llm = parser_service.parse_hadith(ind_or_eng_text)
+        parsed_llm = parser_service.parse_hadith(target_text_for_parser, lang=target_lang_found or parse_lang)
         if parsed_llm:
             print("\n" + "-" * 70)
-            print("🤖 HASIL EKSTRAKSI (LOCAL LLM):")
+            print(f"🤖 HASIL EKSTRAKSI LOCAL LLM ({target_lang_found or parse_lang}):")
             print(f"1. Narrator : {parsed_llm['narrator']}")
             print(f"2. Narration: {parsed_llm['narration']}")
             print(f"3. Note     : {parsed_llm['note']}")
@@ -122,7 +130,7 @@ async def search_cli():
                 print(f"   (Catatan: Filter bahasa {args.lang} aktif)")
             return
 
-        display_hadith_result(result)
+        display_hadith_result(result, parse_lang=args.parse_lang)
 
 
 def main():

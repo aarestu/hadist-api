@@ -43,6 +43,12 @@ def create_search_cli_parser() -> argparse.ArgumentParser:
         help="Opsional: Filter satu atau beberapa bahasa terjemahan (contoh: -l Indonesian English)",
     )
     parser.add_argument(
+        "--parse-lang",
+        type=str,
+        default="Indonesian",
+        help="Opsional: Tentukan bahasa edisi teks yang di-parse oleh Local LLM (Opsi: Indonesian, English, Arabic. Default: Indonesian)",
+    )
+    parser.add_argument(
         "--config",
         type=str,
         default="config.yaml",
