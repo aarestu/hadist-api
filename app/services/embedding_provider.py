@@ -1,7 +1,12 @@
+import logging
+import os
 from abc import ABC, abstractmethod
 from typing import List
-import logging
+
 from app.infrastructure.config import VectorSearchConfig
+
+# Set PyTorch CUDA Memory Allocator configuration to avoid VRAM fragmentation
+os.environ["PYTORCH_CUDA_ALLOC_CONF"] = "expandable_segments:True"
 
 logger = logging.getLogger(__name__)
 
@@ -43,19 +48,22 @@ class SentenceTransformerEmbeddingProvider(BaseEmbeddingProvider):
         logger.info(f"Loading SentenceTransformer model: '{model_name}' on device: '{target_device or 'default (auto)'}'...")
         from sentence_transformers import SentenceTransformer
         self.model = SentenceTransformer(model_name, device=target_device)
+        # Cap max_seq_length to 512 to prevent quadratic attention VRAM explosion on long texts
+        if hasattr(self.model, "max_seq_length"):
+            self.model.max_seq_length = 512
 
     def embed_texts(self, texts: List[str]) -> List[List[float]]:
         if not texts:
             return []
         import torch
 
-        # Use inference mode to disable gradient calculation and save VRAM
+        # Use inference mode and micro-batching (batch_size=32) to keep VRAM usage low and stable
         with torch.inference_mode():
             embeddings = self.model.encode(
                 texts,
                 show_progress_bar=False,
                 normalize_embeddings=True,
-                batch_size=len(texts),
+                batch_size=min(32, len(texts)),
             )
             
         if torch.cuda.is_available():
