@@ -39,7 +39,7 @@ def display_vector_search_results(query: str, results: list):
 
         if r['indonesian_text']:
             snippet = r['indonesian_text'][:250] + ("..." if len(r['indonesian_text']) > 250 else "")
-            print(f"    🇮🇩 Terjemahan (ID): \"{snippet}\"")
+            print(f"    🇮🇩 Terjemahan (ID): \"{r['indonesian_text']}\"")
         elif r['english_text']:
             snippet = r['english_text'][:250] + ("..." if len(r['english_text']) > 250 else "")
             print(f"    🇬🇧 Terjemahan (EN): \"{snippet}\"")

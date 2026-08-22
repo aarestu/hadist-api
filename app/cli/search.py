@@ -27,27 +27,43 @@ def display_hadith_result(result: dict):
     print(f"📖 KITAB       : {result['book_name']} ({result['book_slug']})")
     print(f"🔢 NOMOR HADIS : {result['hadith_number']}")
     if result["arabic_number"]:
-        print(f"🇸🇦 NOMOR ARAB  : {result['arabic_number']}")
+        print(f"🔢 NOMOR ARAB  : {result['arabic_number']}")
 
     if result["section"]:
         sec = result["section"]
-        print(f"📚 BAB / SECTION: Bab {sec['number']} - {sec['title']}")
+        print(f"📑 BAB / SECTION: Bab {sec['number']} - {sec['title']}")
 
     ref = result["reference"]
     if ref["book"] or ref["hadith"]:
-        print(f"📌 REFERENSI   : Kitab {ref['book']}, Hadis #{ref['hadith']}")
+        print(f"📚 REFERENSI   : Kitab {ref['book']}, Hadis #{ref['hadith']}")
 
     print("-" * 70)
-    print("📝 TEKS & TERJEMAHAN:")
+    print("💬 TEKS & TERJEMAHAN:")
+    ind_or_eng_text = ""
     if not result["texts"]:
         print("  (Tidak ada teks terjemahan yang sesuai filter)")
     else:
         for idx, t in enumerate(result["texts"], start=1):
             print(f"\n  [{idx}] Edisi: {t['edition_name']} ({t['language']}) - Penulis: {t['author']}")
             print(f"      \"{t['text']}\"")
+            if "ind" in t['language'].lower():
+                ind_or_eng_text = t['text']
+            elif not ind_or_eng_text and "eng" in t['language'].lower():
+                ind_or_eng_text = t['text']
+
+    if ind_or_eng_text:
+        from app.services.llm_parser_service import LocalLLMHadithParserService
+        parser_service = LocalLLMHadithParserService()
+        parsed_llm = parser_service.parse_hadith(ind_or_eng_text)
+        if parsed_llm:
+            print("\n" + "-" * 70)
+            print("🤖 HASIL EKSTRAKSI (LOCAL LLM):")
+            print(f"1. Narrator : {parsed_llm['narrator']}")
+            print(f"2. Narration: {parsed_llm['narration']}")
+            print(f"3. Note     : {parsed_llm['note']}")
 
     print("\n" + "-" * 70)
-    print("⚖️ DERAJAAT KESHAHIHAN ULAMA:")
+    print("⚖️ DERAJAT KESHAHIHAN ULAMA:")
     if not result["grades"]:
         print("  (Belum ada data penilai derajat)")
     else:
@@ -70,7 +86,7 @@ async def search_cli():
         vector_service = HadithVectorSearchService(config.vector_search)
         results = await vector_service.search(
             query=args.semantic,
-            limit=5,
+            limit=1000,
             book_slug=args.book,
         )
         display_vector_search_results(args.semantic, results)
