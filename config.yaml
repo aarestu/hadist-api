@@ -1,0 +1,43 @@
+# Konfigurasi Hadith API Importer
+
+# URL Database (SQLAlchemy Connection String)
+# Contoh PostgreSQL: postgresql+asyncpg://user:pass@localhost:5432/hadist_db
+# Contoh SQLite: sqlite+aiosqlite:///hadist.db
+database_url: "sqlite+aiosqlite:///hadist.db"
+
+# Pengaturan Unduhan HTTP
+http:
+  timeout_seconds: 30
+  max_concurrent_requests: 10
+  max_retries: 3
+  base_url: "https://cdn.jsdelivr.net/gh/fawazahmed0/hadith-api@1"
+
+# Pengaturan Filter Edisi yang akan diimpor
+# Kosongkan list (editions: []) jika ingin mengimpor SEMUA edisi
+# Atau tentukan kode bahasa (iso_code) atau nama edisi spesifik
+editions_filter:
+  languages:
+    - "Indonesian"
+    - "Arabic"
+    - "English"
+  # Opsional: Tentukan nama edisi spesifik jika tidak ingin semua edisi dari bahasa di atas
+  # specific_editions:
+  #   - "ind-bukhari"
+  #   - "ara-bukhari"
+  #   - "ara-bukhari1"
+  #   - "eng-bukhari"
+
+# Pengaturan Batching Impor Database
+batch_size: 500
+
+# Pengaturan Vector Search & Embedding Provider
+vector_search:
+  vector_db_path: "vector_store"
+  table_name: "hadith_vectors"
+  provider: "sentence-transformers" # Opsi: "sentence-transformers", "openai"
+  model_name: "BAAI/bge-m3" # Model open-source lokal (100+ bahasa)
+  device: "auto" # Opsi: "auto", "cuda", "cpu", "mps"
+  openai_api_key: "" # Opsional jika provider="openai"
+  openai_model: "text-embedding-3-small"
+
+

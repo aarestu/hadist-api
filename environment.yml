@@ -1,0 +1,18 @@
+name: hadist-api
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - python=3.11
+  - pip
+  - pip:
+      - sqlalchemy>=2.0.0
+      - httpx>=0.25.0
+      - pydantic>=2.0.0
+      - pydantic-settings>=2.0.0
+      - pyyaml>=6.0.0
+      - tqdm>=4.66.0
+      - python-dotenv>=1.0.0
+      - psycopg2-binary>=2.9.0
+      - aiosqlite>=0.19.0
+      - asyncpg>=0.29.0

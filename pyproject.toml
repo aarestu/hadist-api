@@ -1,0 +1,29 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "hadist-api-importer"
+version = "1.0.0"
+description = "Async Hadith API Importer & Relational Schema"
+authors = [{ name = "Restu" }]
+dependencies = [
+    "sqlalchemy>=2.0.0",
+    "httpx>=0.25.0",
+    "pydantic>=2.0.0",
+    "pydantic-settings>=2.0.0",
+    "pyyaml>=6.0.0",
+    "tqdm>=4.66.0",
+    "python-dotenv>=1.0.0",
+    "psycopg2-binary>=2.9.0",
+    "aiosqlite>=0.19.0",
+    "asyncpg>=0.29.0",
+    "lancedb>=0.30.0",
+    "sentence-transformers>=3.0.0",
+]
+
+[tool.pytest.ini_options]
+minversion = "7.0"
+addopts = "-ra -q --import-mode=importlib"
+pythonpath = ["."]
+testpaths = ["tests"]
