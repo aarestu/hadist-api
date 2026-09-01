@@ -20,7 +20,11 @@ class LocalLLMHadithParserService:
                 models = resp.json().get("models", [])
                 for m in models:
                     name = m.get("name", "")
-                    if "embed" not in name and ("qwen" in name or "llama" in name or "mistral" in name or "deepseek" in name):
+                    if "embed" not in name and ("qwen" in name):
+                        return name
+                for m in models:
+                    name = m.get("name", "")
+                    if "embed" not in name and ("qwen" in name or "llama" in name or "mistral" in name):
                         return name
                 if models:
                     return models[0].get("name")
@@ -35,15 +39,19 @@ class LocalLLMHadithParserService:
             logger.info("Local LLM (Ollama) tidak ditemukan. Fitur ekstraksi LLM dihilangkan.")
             return None
 
+
         prompt = (
+
             f"Analisis dan ekstrak 3 bagian dari teks hadis ({lang}) berikut:\n"
-            f"1. Narrator: Nama sahabat/perawi terakhir di dalam tanda kurung siku (atau setelah Narrated) sebelum isi matan hadits dimulai (tanpa gelar radliallahu 'anhu/'anha).\n"
+            f"1. Narrator: Nama sahabat/perawi terakhir sebelum isi matan hadits dimulai (tanpa gelar radliallahu 'anhu/'anha).\n"
             f"2. Narration: Isi utama matan/kejadian/sabda hadits.\n"
             f"3. Note: Catatan takhrij atau komentar imam perawi di akhir teks (jika ada). Jika tidak ada, isi \"-\".\n\n"
             f"Teks Hadis:\n\"{text}\"\n\n"
             f"Berikan output JSON persis dalam format ini (tanpa teks tambahan):\n"
-            f'{{"narrator": "...", "narration": "...", "note": "..."}}'
+            f'{{"narrator": "...", "narration": "...", "note": "..."}} \n\n'
         )
+
+        print(model_name)
 
         try:
             resp = httpx.post(

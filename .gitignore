@@ -84,6 +84,8 @@ Thumbs.db
 *.db
 *.sqlite
 *.sqlite3
+!data/*.db
+!data/*.db.gz
 vector_store/
 test_vector/
 test_vector_store/

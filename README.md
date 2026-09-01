@@ -69,6 +69,63 @@ Jika Anda hanya ingin menghapus data dan mengosongkan database:
 python -m app.cli.main --reset-only
 ```
 
+### 4. Split Database Per Bahasa (Untuk CDN / Distribusi Publik)
+Jika Anda ingin memisahkan database master `hadist.db` menjadi database SQLite mandiri per bahasa (`data/hadist.id.db`, `data/hadist.en.db`, `data/hadist.ar.db` dan file kompresi `.gz` untuk batas 20MB jsDelivr CDN):
+```bash
+# Split seluruh bahasa sekaligus (Indonesia, English, Arabic)
+python -m app.cli.split_db
+
+# Split hanya bahasa tertentu:
+python -m app.cli.split_db --lang id
+python -m app.cli.split_db --lang en
+python -m app.cli.split_db --lang ar
+```
+
+---
+
+## 🌐 Distribusi CDN jsDelivr & Download Database Publik
+
+File database SQLite per-bahasa disimpan di dalam folder `data/` dan dapat diunduh langsung oleh publik melalui jaringan **jsDelivr CDN**.
+
+> [!TIP]
+> **Kompatibilitas Batas Ukuran File jsDelivr (20 MB)**:
+> jsDelivr membatasi ukuran file tunggal maksimal 20 MB. Seluruh database telah disediakan dalam versi kompresi gzip (`.gz`) berukuran **< 16 MB** sehingga siap di-download dengan sangat cepat.
+
+### Ringkasan Ukuran File & Tautan CDN
+
+| Bahasa | File SQLite Mentah | File Gzip (CDN) | Jumlah Hadis | Ukuran (.db) | Ukuran (.gz) | Tautan CDN jsDelivr |
+| :--- | :--- | :--- | :---: | :---: | :---: | :--- |
+| **Indonesia** | `hadist.id.db` | `hadist.id.db.gz` | 30.888 | ~38.9 MB | **~8.8 MB** | `https://cdn.jsdelivr.net/gh/aarestu/hadist-api@master/data/hadist.id.db.gz` |
+| **English** | `hadist.en.db` | `hadist.en.db.gz` | 36.097 | ~30.5 MB | **~8.2 MB** | `https://cdn.jsdelivr.net/gh/aarestu/hadist-api@master/data/hadist.en.db.gz` |
+| **Arabic** | `hadist.ar.db` | `hadist.ar.db.gz` | 36.104 | ~84.2 MB | **~15.2 MB** | `https://cdn.jsdelivr.net/gh/aarestu/hadist-api@master/data/hadist.ar.db.gz` |
+
+### Cara Mengunduh & Mengekstrak di Aplikasi Klien
+
+#### Menggunakan cURL / Wget (Linux / macOS / PowerShell):
+```bash
+# Download hadist bahasa indonesia terkompresi
+curl -L -o hadist.id.db.gz https://cdn.jsdelivr.net/gh/aarestu/hadist-api@master/data/hadist.id.db.gz
+
+# Ekstrak file menjadi SQLite Database
+gzip -d hadist.id.db.gz
+```
+
+#### Menggunakan Python:
+```python
+import gzip
+import shutil
+import urllib.request
+
+url = "https://cdn.jsdelivr.net/gh/aarestu/hadist-api@master/data/hadist.id.db.gz"
+urllib.request.urlretrieve(url, "hadist.id.db.gz")
+
+with gzip.open("hadist.id.db.gz", "rb") as f_in:
+    with open("hadist.id.db", "wb") as f_out:
+        shutil.copyfileobj(f_in, f_out)
+```
+
+---
+
 ### 5. Pencarian Hadis (CLI Search & Semantic Search)
 Anda dapat mencari hadis spesifik berdasarkan nama kitab (`--book` / `-b`) dan nomor kanonikal digital (`--number` / `-n`) ATAU nomor cetakan Arab (`--arabic-number` / `-a`):
 ```bash
@@ -84,6 +141,7 @@ python -m app.cli.search -b abudawud -n 1035 -l Indonesian Arabic
 ```
 
 ---
+
 
 ## 🔍 Pencarian Semantik (Vector Search)
 
@@ -188,6 +246,10 @@ vector_search:
 ```
 hadist-api/
 ├── CONTEXT.md               # Glosarium Bahasa Domain (Book, Section, Edition, Hadith, Grade)
+├── data/                    # Database SQLite per bahasa (CDN distribution)
+│   ├── hadist.id.db (.gz)   # Database Hadis Terjemahan Bahasa Indonesia
+│   ├── hadist.en.db (.gz)   # Database Hadis Terjemahan Bahasa Inggris
+│   └── hadist.ar.db (.gz)   # Database Hadis Teks Asli Bahasa Arab
 ├── docs/
 │   ├── adr/
 │   │   └── 0001-vector-search-architecture.md # Architectural Decision Record Vector Search
@@ -207,12 +269,14 @@ hadist-api/
     │   └── http_client.py
     ├── services/            # Layer 3: Application Business Logic
     │   ├── importer_service.py
+    │   ├── db_splitter_service.py     # Splitter Database SQLite Per-Bahasa
     │   ├── search_service.py
     │   ├── embedding_provider.py      # Modular Embedding Provider (BGE-M3 / OpenAI)
     │   ├── vector_search_service.py   # LanceDB Vector Search Engine
     │   └── batch_benchmark_service.py # Optimizer Batch Size GPU/CPU
     └── cli/                 # Layer 4: Command Line Interface Entrypoint
         ├── main.py
+        ├── split_db.py                # CLI Split Database Per-Bahasa
         ├── search.py
         ├── vector_cli.py
         └── benchmark_batch.py
